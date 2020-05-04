@@ -18,7 +18,7 @@
             th:src="@{/webjars/bootstrap/4.4.1/css/bootstrap.min.css}"></script>
 </head>
 <body>
-<!--/*@thymesVar id="recipe" type="com.ravi.recipe"*/-->
+<!--/*@thymesVar id="recipe" type="com.ravi.recipemongoapp"*/-->
 <!--/*@thymesVar id="recipes" type="java.util.List"*/-->
 <div class="container-fluid" style="margin-top: 20px">
     <div class="row">
@@ -47,13 +47,13 @@
                                 </tr>
                             </thead>
                             <tr th:remove="all">
-                                <!--/*@thymesVar id="recipe" type="com.ravi.recipe"*/-->
+                                <!--/*@thymesVar id="recipe" type="com.ravi.recipemongoapp"*/-->
                                 <td th:text="${recipe.id}">123</td>
                                 <td th:text="${recipe.description}">Tasty Goodnees 1</td>
                                 <td><a href="#">View</a></td>
                             </tr>
                             <tr th:remove="all">
-                                <!--/*@thymesVar id="recipe" type="com.ravi.recipe"*/-->
+                                <!--/*@thymesVar id="recipe" type="com.ravi.recipemongoapp"*/-->
                                 <td th:text="${recipe.id}">12333</td>
                                 <td th:text="${recipe.description}">Tasty Goodnees 2</td>
                                 <td><a href="#">View</a></td>
@@ -70,7 +70,7 @@
                                 <td th:text="${recipe.difficulty}"></td>
                             </tr>-->
                             <tr th:each="recipe : ${recipes}">
-                                <!--/*@thymesVar id="recipe" type="com.ravi.recipe"*/-->
+                                <!--/*@thymesVar id="recipe" type="com.ravi.recipemongoapp"*/-->
                                 <td th:text="${recipe.id}">334</td>
                                 <td th:text="${recipe.description}">Tasty Goodnees 3</td>
                                 <td><a href="#" th:href="@{'/recipe/'+ ${recipe.id} +'/show/'}">View</a></td>

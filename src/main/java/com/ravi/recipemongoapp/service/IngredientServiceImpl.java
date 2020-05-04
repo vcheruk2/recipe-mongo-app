@@ -81,7 +81,7 @@ public class IngredientServiceImpl implements IngredientService {
             if (!ingredientOptional.isPresent()){
                 // New Ingredient
                 Ingredient ingredient = ingredientCommandToIngredient.convert(command);
-                ingredient.setRecipe(recipe);
+                //ingredient.setRecipe(recipe);
                 recipe.addIngredient(ingredient);
             }
             else{
@@ -109,8 +109,12 @@ public class IngredientServiceImpl implements IngredientService {
                         .findFirst();
             }
 
+            // Enhance with id value
+            IngredientCommand ingredientCommandSaved = ingredientToIngredientCommand.convert(savedIngredientOptional.get());
+            ingredientCommandSaved.setRecipeId(recipe.getId());
+
             // TODO: Check for failure conditions
-            return ingredientToIngredientCommand.convert(savedIngredientOptional.get());
+            return ingredientCommandSaved;
         }
     }
 
@@ -156,7 +160,7 @@ public class IngredientServiceImpl implements IngredientService {
                     .findFirst();
             if (ingredientOptional.isPresent()){
                 Ingredient ingredient = ingredientOptional.get();
-                ingredient.setRecipe(null);
+                //ingredient.setRecipe(null);
                 recipe.getIngredients().remove(ingredient);
                 recipeRepository.save(recipe);
             }
