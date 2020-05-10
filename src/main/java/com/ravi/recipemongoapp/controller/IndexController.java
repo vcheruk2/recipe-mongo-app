@@ -5,6 +5,7 @@ import com.ravi.recipemongoapp.domain.UnitOfMeasure;
 import com.ravi.recipemongoapp.repositories.CategoryRepository;
 import com.ravi.recipemongoapp.repositories.RecipeRepository;
 import com.ravi.recipemongoapp.repositories.UnitOfMeasureRepository;
+import com.ravi.recipemongoapp.repositories.reactive.RecipeReactiveRepository;
 import com.ravi.recipemongoapp.service.RecipeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -19,13 +20,16 @@ public class IndexController {
 
     private CategoryRepository categoryRepository;
     private UnitOfMeasureRepository unitOfMeasureRepository;
-    private RecipeRepository recipeRepository;
+    private RecipeReactiveRepository recipeReactiveRepository;
     private final RecipeService recipeService;
 
-    public IndexController(CategoryRepository categoryRepository, UnitOfMeasureRepository unitOfMeasureRepository, RecipeRepository recipeRepository, RecipeService recipeService) {
+    public IndexController(CategoryRepository categoryRepository,
+                           UnitOfMeasureRepository unitOfMeasureRepository,
+                           RecipeReactiveRepository recipeReactiveRepository,
+                           RecipeService recipeService) {
         this.categoryRepository = categoryRepository;
         this.unitOfMeasureRepository = unitOfMeasureRepository;
-        this.recipeRepository = recipeRepository;
+        this.recipeReactiveRepository = recipeReactiveRepository;
         this.recipeService = recipeService;
     }
 
@@ -43,7 +47,7 @@ public class IndexController {
         log.debug("Calling index page");
 
         //model.addAttribute("recipes", recipeRepository.findAll());
-        model.addAttribute("recipes", recipeService.getRecipes());
+        model.addAttribute("recipes", recipeService.getRecipes().collectList().block());
 
         return "index";
     }

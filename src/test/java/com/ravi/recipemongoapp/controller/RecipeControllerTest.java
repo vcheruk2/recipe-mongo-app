@@ -5,6 +5,7 @@ import com.ravi.recipemongoapp.domain.Recipe;
 import com.ravi.recipemongoapp.exceptions.NotFoundException;
 import com.ravi.recipemongoapp.service.RecipeService;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -12,6 +13,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import reactor.core.publisher.Mono;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -30,8 +32,8 @@ public class RecipeControllerTest {
     @Mock
     static RecipeService recipeService;
 
-    @BeforeAll
-    public static void setUp(){
+    @BeforeEach
+    public void setUp(){
         MockitoAnnotations.initMocks(new RecipeControllerTest());
         recipeController = new RecipeController(recipeService);
         mockMvc = MockMvcBuilders.standaloneSetup(recipeController)
@@ -52,7 +54,7 @@ public class RecipeControllerTest {
         RecipeCommand command = new RecipeCommand();
         command.setId(String.valueOf(2L));
 
-        when(recipeService.saveRecipeCommand(any())).thenReturn(command);
+        when(recipeService.saveRecipeCommand(any())).thenReturn(Mono.just(command));
 
         mockMvc.perform(post("/recipe")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -69,7 +71,7 @@ public class RecipeControllerTest {
         RecipeCommand command = new RecipeCommand();
         command.setId(String.valueOf(2L));
 
-        when(recipeService.saveRecipeCommand(any())).thenReturn(command);
+        when(recipeService.saveRecipeCommand(any())).thenReturn(Mono.just(command));
 
         mockMvc.perform(post("/recipe")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -85,7 +87,7 @@ public class RecipeControllerTest {
         RecipeCommand command = new RecipeCommand();
         command.setId(String.valueOf(2L));
 
-        when(recipeService.findCommandById(anyString())).thenReturn(command);
+        when(recipeService.findCommandById(anyString())).thenReturn(Mono.just(command));
 
         mockMvc.perform(get("/recipe/1/update"))
                 .andExpect(status().isOk())
@@ -96,10 +98,12 @@ public class RecipeControllerTest {
     @Test
     public void testDelete() throws Exception {
 
+        // when
         mockMvc.perform(get("/recipe/3/delete"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(view().name("redirect:/"));
 
+        // then
         verify(recipeService, times(1)).deleteById(anyString());
     }
 
@@ -131,13 +135,13 @@ public class RecipeControllerTest {
                 .andExpect(view().name("400error"));
     }
 
-    /*@Test
+    @Test
     public void testGetRecipe() throws Exception {
         Recipe recipe = new Recipe();
         recipe.setDescription("Test recipe");
-        recipe.setId(1L);
+        recipe.setId("1");
 
-        when(recipeService.findById(anyString())).thenReturn(recipe);
+        when(recipeService.findById(anyString())).thenReturn(Mono.just(recipe));
 
         mockMvc.perform(get("/recipe/1/show"))
                 .andExpect(status().isOk())
@@ -145,5 +149,5 @@ public class RecipeControllerTest {
                 .andExpect(model().attributeExists("recipe"));
 
         verify(recipeService, times(1)).findById(anyString());
-    }*/
+    }
 }

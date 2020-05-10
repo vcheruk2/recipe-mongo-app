@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -47,7 +48,7 @@ public class RecipeServiceIT {
 
         //when
         testRecipeCommand.setDescription(NEW_DESC);
-        RecipeCommand savedRecipeCommand = recipeService.saveRecipeCommand(testRecipeCommand);
+        RecipeCommand savedRecipeCommand = recipeService.saveRecipeCommand(testRecipeCommand).block();
 
         //then
         assertEquals(NEW_DESC, savedRecipeCommand.getDescription());

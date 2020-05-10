@@ -8,6 +8,7 @@ import com.ravi.recipemongoapp.domain.UnitOfMeasure;
 import com.ravi.recipemongoapp.repositories.CategoryRepository;
 import com.ravi.recipemongoapp.repositories.RecipeRepository;
 import com.ravi.recipemongoapp.repositories.UnitOfMeasureRepository;
+import com.ravi.recipemongoapp.repositories.reactive.RecipeReactiveRepository;
 import com.ravi.recipemongoapp.service.RecipeServiceImpl;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -18,8 +19,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.ui.Model;
+import reactor.core.publisher.Flux;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -43,15 +46,15 @@ class IndexControllerTest {
     @Mock
     public static UnitOfMeasureRepository unitOfMeasureRepository;
     @Mock
-    public static RecipeRepository recipeRepository;
+    public static RecipeReactiveRepository recipeReactiveRepository;
     @Mock
     public static Model model;
 
     @BeforeAll
     public static void setUp(){
         MockitoAnnotations.initMocks(new IndexControllerTest());
-        recipeService = new RecipeServiceImpl(recipeRepository, recipeToRecipeCommand, recipeCommandToRecipe);
-        indexController = new IndexController(categoryRepository, unitOfMeasureRepository, recipeRepository, recipeService);
+        recipeService = new RecipeServiceImpl(recipeReactiveRepository, recipeToRecipeCommand, recipeCommandToRecipe);
+        indexController = new IndexController(categoryRepository, unitOfMeasureRepository, recipeReactiveRepository, recipeService);
     }
 
     @Test
@@ -72,14 +75,10 @@ class IndexControllerTest {
 
     @Test
     void mapIndex() {
-        Set<Recipe> recipes = new HashSet<>();
         Recipe recipe = new Recipe();
         recipe.setDescription("recipe");
         Recipe recipe2 = new Recipe();
         recipe2.setDescription("recipe2");
-
-        recipes.add(recipe);
-        recipes.add(recipe2);
 
         //log.debug("recipes size = "+recipes.size());
 
@@ -94,17 +93,18 @@ class IndexControllerTest {
         assertEquals("1", categoryRepository.findByDescription("American").get().getId());
         verify(categoryRepository, times(1)).findByDescription("American");
 
-        when(recipeRepository.findAll()).thenReturn(recipes);
-        assertEquals(2, recipeService.getRecipes().size());
-        verify(recipeRepository, times(1)).findAll();
+        when(recipeReactiveRepository.findAll()).thenReturn(Flux.just(recipe, recipe2));
+        assertEquals(2, recipeService.getRecipes().collectList().block().size());
+        verify(recipeReactiveRepository, times(1)).findAll();
 
-        ArgumentCaptor<Set<Recipe>> argumentCaptor = ArgumentCaptor.forClass(Set.class);
+        ArgumentCaptor<List<Recipe>> argumentCaptor = ArgumentCaptor.forClass(List.class);
 
         assertEquals("index", indexController.mapIndex(model));
         //verify(model, times(1)).addAttribute(eq("recipes"), anySet());
         verify(model, times(1)).addAttribute(eq("recipes"), argumentCaptor.capture());
-        Set<Recipe> capturedRecipes = argumentCaptor.getValue();
+        List<Recipe> capturedRecipes = argumentCaptor.getValue();
         assertEquals(2, capturedRecipes.size());
+
     }
 
 
