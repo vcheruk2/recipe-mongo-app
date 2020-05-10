@@ -155,6 +155,8 @@ public class IngredientControllerTest {
     @Test
     public void deleteIngredient() throws Exception {
 
+        when(ingredientService.deleteById(anyString(), anyString())).thenReturn(Mono.empty());
+
         //then
         mockMvc.perform(get("/recipe/2/ingredient/1/delete"))
                 .andExpect(status().is3xxRedirection())
