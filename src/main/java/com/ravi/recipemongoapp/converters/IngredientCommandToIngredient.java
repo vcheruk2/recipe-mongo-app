@@ -33,7 +33,7 @@ public class IngredientCommandToIngredient implements Converter<IngredientComman
         log.debug("source id + "+ source.getId());
         log.debug("source id len = "+ source.getId().length());*/
 
-        if (source.getId().length() != 0)
+        if (source.getId() != null && source.getId().length() != 0)
             ingredient.setId(source.getId());
 
         if (source.getRecipeId() != null){
