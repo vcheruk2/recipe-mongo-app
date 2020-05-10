@@ -4,8 +4,10 @@ import com.ravi.recipemongoapp.commands.UnitOfMeasureCommand;
 import com.ravi.recipemongoapp.converters.UnitOfMeasureToUnitOfMeasureCommand;
 import com.ravi.recipemongoapp.domain.UnitOfMeasure;
 import com.ravi.recipemongoapp.repositories.UnitOfMeasureRepository;
+import com.ravi.recipemongoapp.repositories.reactive.UnitOfMeasureReactiveRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,15 +18,21 @@ import java.util.Set;
 @Slf4j
 public class UnitOfMeasureServiceImpl implements UnitOfMeasureService {
 
-    private final UnitOfMeasureRepository unitOfMeasureRepository;
+    private final UnitOfMeasureReactiveRepository unitOfMeasureReactiveRepository;
     private final UnitOfMeasureToUnitOfMeasureCommand unitOfMeasureToUnitOfMeasureCommand;
 
-    public UnitOfMeasureServiceImpl(UnitOfMeasureRepository unitOfMeasureRepository, UnitOfMeasureToUnitOfMeasureCommand unitOfMeasureToUnitOfMeasureCommand) {
-        this.unitOfMeasureRepository = unitOfMeasureRepository;
+    public UnitOfMeasureServiceImpl(UnitOfMeasureReactiveRepository unitOfMeasureReactiveRepository, UnitOfMeasureToUnitOfMeasureCommand unitOfMeasureToUnitOfMeasureCommand) {
+        this.unitOfMeasureReactiveRepository = unitOfMeasureReactiveRepository;
         this.unitOfMeasureToUnitOfMeasureCommand = unitOfMeasureToUnitOfMeasureCommand;
     }
 
     @Override
+    public Flux<UnitOfMeasureCommand> listAllUoms() {
+        return unitOfMeasureReactiveRepository.findAll()
+                .map(unitOfMeasureToUnitOfMeasureCommand::convert);
+    }
+
+    /*@Override
     public Set<UnitOfMeasureCommand> listAllUoms() {
         Set<UnitOfMeasureCommand> unitOfMeasureCommand = new HashSet<>();
         Set<UnitOfMeasure> unitOfMeasure = new HashSet<>();
@@ -36,5 +44,5 @@ public class UnitOfMeasureServiceImpl implements UnitOfMeasureService {
         log.debug("Unit of measure command size = " + unitOfMeasureCommand.size());
 
         return unitOfMeasureCommand;
-    }
+    }*/
 }

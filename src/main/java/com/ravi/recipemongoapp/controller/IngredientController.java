@@ -40,7 +40,7 @@ public class IngredientController {
                                   @PathVariable String ingredient_id,
                                   Model model){
         model.addAttribute("ingredient", ingredientService.findByRecipeIdAndIngredientId(recipe_id,
-                                                                                ingredient_id));
+                                                                                ingredient_id).block());
         return "recipe/ingredient/show";
     }
 
@@ -50,14 +50,14 @@ public class IngredientController {
                                     @PathVariable String ingredient_id,
                                     Model model){
         model.addAttribute("ingredient", ingredientService.findByRecipeIdAndIngredientId(recipe_id,
-                                                                                                ingredient_id) );
-        model.addAttribute("uomList", unitOfMeasureService.listAllUoms());
+                                                                                                ingredient_id).block());
+        model.addAttribute("uomList", unitOfMeasureService.listAllUoms().collectList().block());
         return "recipe/ingredient/ingredientform";
     }
 
     @PostMapping("recipe/{recipeId}/ingredient")
     public String saveOrUpdate(@ModelAttribute IngredientCommand command){
-        IngredientCommand savedCommand = ingredientService.saveIngredientCommand(command);
+        IngredientCommand savedCommand = ingredientService.saveIngredientCommand(command).block();
 
         log.debug("saved receipe id:" + savedCommand.getRecipeId());
         log.debug("saved ingredient id:" + savedCommand.getId());
@@ -78,7 +78,7 @@ public class IngredientController {
 
         ingredientCommand.setUom(new UnitOfMeasureCommand());
 
-        model.addAttribute("uomList", unitOfMeasureService.listAllUoms());
+        model.addAttribute("uomList", unitOfMeasureService.listAllUoms().collectList().block());
 
         return "recipe/ingredient/ingredientform";
     }
