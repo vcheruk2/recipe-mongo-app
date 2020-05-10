@@ -1,14 +1,13 @@
 package com.ravi.recipemongoapp.service;
 
 import com.ravi.recipemongoapp.domain.Recipe;
-import com.ravi.recipemongoapp.repositories.RecipeRepository;
+import com.ravi.recipemongoapp.repositories.reactive.RecipeReactiveRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
-import java.util.Optional;
 
 /* Created by: Venkata Ravichandra Cherukuri
    Created on: 4/18/2020 */
@@ -16,39 +15,35 @@ import java.util.Optional;
 @Slf4j
 public class ImageServiceImpl implements ImageService {
 
-    private final RecipeRepository recipeRepository;
+    private final RecipeReactiveRepository recipeReactiveRepository;
 
-    public ImageServiceImpl(RecipeRepository recipeRepository) {
-        this.recipeRepository = recipeRepository;
+    public ImageServiceImpl(RecipeReactiveRepository recipeReactiveRepository) {
+        this.recipeReactiveRepository = recipeReactiveRepository;
     }
 
     @Override
-    @Transactional
-    public void saveImageFile(String recipeId, MultipartFile file) {
+    public Mono<Void> saveImageFile(String recipeId, MultipartFile file) {
+        Mono<Recipe> recipeMono = recipeReactiveRepository.findById(recipeId)
+                .map(recipe -> {
+                    Byte[] byteObj = new Byte[0];
+                    try{
+                        byteObj = new Byte[file.getBytes().length];
 
-        Optional<Recipe> recipeOptional = recipeRepository.findById(recipeId);
+                        int i = 0;
+                        for(byte b : file.getBytes())
+                            byteObj[i++] = b;
 
-        // TODO: Add more validation logic here
-        if (!recipeOptional.isPresent()){
-            log.error("Unable to find recipe for id " + recipeId);
-            return;
-        }
+                        recipe.setImage(byteObj);
 
-        Recipe recipe = recipeOptional.get();
+                        return recipe;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        throw new RuntimeException(e);
+                    }
+                });
 
-        try {
-            Byte[] bytesObj = new Byte[file.getBytes().length];
+        recipeReactiveRepository.save(recipeMono.block()).block();
 
-            int idx = 0;
-            for (byte b : file.getBytes())
-                bytesObj[idx++] = b;
-
-            recipe.setImage(bytesObj);
-            recipeRepository.save(recipe);
-
-        } catch (IOException e) {
-            // TODO: Handle exception
-            e.printStackTrace();
-        }
+        return Mono.empty();
     }
 }
